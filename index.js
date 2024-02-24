@@ -2,12 +2,11 @@ const express = require("express");
 const morgan = require("morgan");
 const app = express();
 
-morgan.token('body', req => {
-  return JSON.stringify(req.body)
-})
+morgan.token("body", (req) => {
+  return JSON.stringify(req.body);
+});
 
 app.use(express.json());
-app.use(express.static('dist'))
 app.use(morgan(":method :url :body"));
 
 let persons = [
@@ -64,6 +63,17 @@ app.post("/api/persons", (request, response) => {
   response.json(person);
 });
 
+app.put("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const idx = persons.findIndex((p) => p.id === id);
+
+  if (idx !== -1) {
+    const person = request.body;
+    persons.splice(idx, 1, person);
+    response.json(person);
+  } else response.status(404).end();
+});
+
 app.get("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   const person = persons.find((p) => p.id === id);
@@ -85,7 +95,7 @@ app.get("/info", (request, response) => {
   );
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
